@@ -53,6 +53,6 @@ ENV APACHE_SERVERALIAS docker.localhost
 ENV APACHE_DOCUMENTROOT /var/www
 
 EXPOSE 80
-ADD start /start.sh
+ADD start.sh /start.sh
 RUN chmod 0755 /start.sh
 CMD ["bash", "start.sh"]

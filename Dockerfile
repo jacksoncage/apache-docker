@@ -2,41 +2,43 @@ FROM        debian
 MAINTAINER  Love Nyberg "love.nyberg@lovemusic.se"
 
 # Update the package repository
-RUN apt-get update; apt-get upgrade -y; apt-get install locales
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \ 
+	DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y wget curl locales
 
 # Configure timezone and locale
-RUN echo "Europe/Stockholm" > /etc/timezone; dpkg-reconfigure -f noninteractive tzdata
-RUN export LANGUAGE=en_US.UTF-8; export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; locale-gen en_US.UTF-8; DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
+RUN echo "Europe/Stockholm" > /etc/timezone && \
+	dpkg-reconfigure -f noninteractive tzdata
+RUN export LANGUAGE=en_US.UTF-8 && \
+	export LANG=en_US.UTF-8 && \
+	export LC_ALL=en_US.UTF-8 && \
+	locale-gen en_US.UTF-8 && \
+	DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
 
 # Added dotdeb to apt
-RUN echo "deb http://packages.dotdeb.org wheezy all" >> /etc/apt/sources.list
-RUN echo "deb-src http://packages.dotdeb.org wheezy all" >> /etc/apt/sources.list
-RUN wget -q http://www.dotdeb.org/dotdeb.gpg -O- | apt-key add -
-
-# Install base system
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget curl
+RUN echo "deb http://packages.dotdeb.org squeeze all" >> /etc/apt/sources.list.d/dotdeb.org.list && \
+	echo "deb-src http://packages.dotdeb.org squeeze all" >> /etc/apt/sources.list.d/dotdeb.org.list && \
+	wget -O- http://www.dotdeb.org/dotdeb.gpg | apt-key add -
 
 # Install PHP 5.5
-RUN apt-get update; apt-get install -y php5-cli php5 php5-mcrypt php5-curl php5-pgsql
+RUN apt-get update; apt-get install -y php5-cli php5 php5-mcrypt php5-curl php5-pgsql php5-mysql
  
 # Let's set the default timezone in both cli and apache configs
-RUN sed -ie 's/\;date\.timezone\ \=/date\.timezone\ \=\ Europe\/Stockholm/g' /etc/php5/cli/php.ini
-RUN sed -ie 's/\;date\.timezone\ \=/date\.timezone\ \=\ Europe\/Stockholm/g' /etc/php5/apache2/php.ini
+RUN sed -i 's/\;date\.timezone\ \=/date\.timezone\ \=\ Europe\/Stockholm/g' /etc/php5/cli/php.ini
+RUN sed -i 's/\;date\.timezone\ \=/date\.timezone\ \=\ Europe\/Stockholm/g' /etc/php5/apache2/php.ini
 
 # Setup Composer
-RUN curl -sS https://getcomposer.org/installer | php; mv composer.phar /usr/local/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php && \
+	mv composer.phar /usr/local/bin/composer
 
 # Setup conf for Zend Framework
-RUN sed -ie 's/;include_path = ".:\/usr\/share\/php"/include_path = ".:\/var\/www\/library"/g' /etc/php5/cli/php.ini
-RUN sed -ie 's/\;include_path = ".:\/usr\/share\/php"/include_path = ".:\/var\/www\/library"/g' /etc/php5/apache2/php.ini
+RUN sed -i 's/;include_path = ".:\/usr\/share\/php"/include_path = ".:\/var\/www\/library"/g' /etc/php5/cli/php.ini
+RUN sed -i 's/\;include_path = ".:\/usr\/share\/php"/include_path = ".:\/var\/www\/library"/g' /etc/php5/apache2/php.ini
 # Activate a2enmod
 RUN a2enmod rewrite
 
 ADD ./001-docker.conf /etc/apache2/sites-available/
 RUN ln -s /etc/apache2/sites-available/001-docker.conf /etc/apache2/sites-enabled/
-
-# Restart apache2 because we changed configuration directives in php.ini
-RUN service apache2 restart
 
 # Set Apache environment variables (can be changed on docker run with -e)
 ENV APACHE_RUN_USER www-data

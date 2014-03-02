@@ -1,7 +1,8 @@
 Automated build of Apache with Docker
 ===========
 
- > Based on (Debian official repository)[https://index.docker.io/_/debian/]
+ - Master and Debian branches are based on [Debian official repository](https://index.docker.io/_/debian/)
+ - Ubuntu branch are based on [Ubuntu official repository](https://index.docker.io/_/ubuntu/)
 
 ### Apache environment variables
 Apache will make of the following environment variables.

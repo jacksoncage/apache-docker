@@ -16,8 +16,8 @@ RUN export LANGUAGE=en_US.UTF-8 && \
 	DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
 
 # Added dotdeb to apt
-RUN echo "deb http://packages.dotdeb.org squeeze all" >> /etc/apt/sources.list.d/dotdeb.org.list && \
-	echo "deb-src http://packages.dotdeb.org squeeze all" >> /etc/apt/sources.list.d/dotdeb.org.list && \
+RUN echo "deb http://packages.dotdeb.org wheezy-php55 all" >> /etc/apt/sources.list.d/dotdeb.org.list && \
+	echo "deb-src http://packages.dotdeb.org wheezy-php55 all" >> /etc/apt/sources.list.d/dotdeb.org.list && \
 	wget -O- http://www.dotdeb.org/dotdeb.gpg | apt-key add -
 
 # Install PHP 5.5
